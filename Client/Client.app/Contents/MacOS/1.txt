@@ -1,0 +1,132 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:    02:35:46 06/22/2016 
+-- Design Name: 
+-- Module Name:    ahmad_amjad_cont - Behavioral 
+-- Project Name: 
+-- Target Devices: 
+-- Tool versions: 
+-- Description: 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_unsigned.all;
+
+entity ahmad_cont is
+ port(
+   clk: in STD_LOGIC;
+	OPCode_IN: in STD_LOGIC_VECTOR(4 downto 0);
+	Z_In: in STD_LOGIC;
+	C_In: in STD_LOGIC;
+	D_In: in STD_LOGIC;
+	Reset_In: in STD_LOGIC:='0';
+	
+   PC_INC:out STD_LOGIC;
+	Reset_out:out STD_LOGIC;
+	PC_LOAD: out STD_LOGIC;
+	IR_WR:out STD_LOGIC;
+	RAM_MUX: out STD_LOGIC;
+	RAM_RD:out STD_LOGIC;
+	RAM_WR:out STD_LOGIC;
+	MDR_WR:out STD_LOGIC;
+	ALU_MUXOUT: out STD_LOGIC;
+	A_WR:out STD_LOGIC;
+	ALU_EN:out STD_LOGIC;
+	Flag_WR:out STD_LOGIC; 
+	ALU_OPOUT: out STD_LOGIC_VECTOR(3 downto 0)
+  );	
+end ahmad_cont;
+
+architecture Behavioral of ahmad_cont is
+
+ component Unit1
+  port(
+	 clk: in STD_LOGIC;
+    OPCode : in STD_LOGIC_VECTOR(4 downto 0);
+	 Z: in STD_LOGIC;
+    C: in STD_LOGIC;
+    D: in STD_LOGIC;
+	 BR_Code: out STD_LOGIC_VECTOR(2 downto 0);
+    ALU_OP: out STD_LOGIC_VECTOR(3 downto 0);
+    ALU_MUX: out STD_LOGIC
+  );
+ end component ;
+ 
+ signal br_code:STD_LOGIC_VECTOR (2 downto 0);
+ type state_type is(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10);
+ signal current_state, next_state :state_type:=s0;
+ signal A_WRS:  STD_LOGIC ;
+ signal clk2:  STD_LOGIC:='0' ;
+ signal clk3:  STD_LOGIC;
+ signal IR_WRS: STD_LOGIC ;
+ signal Flag_WRS: STD_LOGIC ;
+ signal MDR_WRS: STD_LOGIC ;
+signal c1:integer range 0 to 101000000 :=0;
+
+ 
+ begin
+ 
+ div :process(clk)
+
+begin
+if(clk'event and clk='1' ) then
+  if(c1 < 100000000) then
+		c1<=c1+1;
+	else
+	c1<=0;
+	clk2 <= not clk2;
+    end if;
+end if;
+end process;
+	clk3<= not clk2;  
+
+	A_WR<= A_WRS and clk3; -- These signals are anded with the clock to make sure the data is valid
+	IR_WR<= IR_WRS and clk3;
+	Flag_WR<= Flag_WRS and clk3;
+	MDR_WR<= MDR_WRS and clk3;
+   module1: Unit1
+	port map (clk2,OPCode_IN,Z_In,C_In,D_In,br_code,ALU_OPOUT,ALU_MUXOUT);
+   
+	
+	State_transition :process(clk2,Reset_In) 
+	 begin
+	 if (Reset_In ='1')then
+	 
+	 current_state<= s0;
+	 Reset_out<='1';
+	 else
+	
+		if (clk2'event and clk2 = '1') then
+		Reset_out<='0';
+			current_state<= next_state;
+		end if;
+	 end if;
+   end process;
+	
+	Control_lines :process(current_state)
+	 
+    begin
+		case current_state is
+			when s0 =>
+				RAM_MUX<= '0';
+				PC_INC<= '0' ;
+				PC_LOAD<= '1';
+				A_WRS <= '0';
+				IR_WRS <= '1' ;
+			   Flag_WRS <= '0' ;
+				MDR_WRS <= '0' ;
+				ALU_EN<= '0';
+				RAM_RD<= '1' ;
+				RAM_WR<= '1' ;
+				next_state <= s1;
+			when s1 =>
+				RAM_MUX<= @@@finish@@@/
